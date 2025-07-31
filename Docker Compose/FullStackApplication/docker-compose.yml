@@ -1,0 +1,44 @@
+version: '3.8'
+services:
+  fronted:
+    build: ./fronted
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend
+    networks:
+      - my-custom-network
+
+  backend:
+    build: ./backend
+    ports:
+      - "3000:3001"        #"0" somecase whatever port open container will be attached
+    environment:
+      DB_HOST: database
+      DB_USER: postgres
+      DB_PASS: password
+      DB_NAME: postgres
+    depends_on:
+      - database
+    networks:
+      - my-custom-network
+
+  database:
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - "5432:5432" # default port for PostgreSQL
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data #default write the data pg
+    networks:
+      - my-custom-network
+
+volumes:
+  pgdata:
+networks:
+  my-custom-network:
+    driver: bridge
